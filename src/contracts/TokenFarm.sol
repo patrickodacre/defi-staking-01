@@ -39,6 +39,19 @@ contract TokenFarm {
         isStaking[msg.sender] = true;
     }
 
+    function withdrawTokens(uint _amount) public {
+        uint currentBalance = stakingBalance[msg.sender];
+
+        require(_amount <= currentBalance, "You cannot withdraw more than you have staked.");
+
+        stakingBalance[msg.sender] = stakingBalance[msg.sender] - _amount;
+
+        if (stakingBalance[msg.sender] == uint(0)) {
+            hasStaked[msg.sender] = false;
+            isStaking[msg.sender] = false;
+        }
+    }
+
     function issueTokens() public {
         require(msg.sender == owner, "Only the contract owner can issue tokens.");
 

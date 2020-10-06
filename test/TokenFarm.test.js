@@ -100,12 +100,64 @@ contract('TokenFarm', accounts => {
 
     })
 
+    describe('tokenFarm.withdrawTokens', () => {
+        it('investor cannot withdraw more than they have staked', async() => {
+
+            try {
+                await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+            } catch(e) {
+                assert.equal(e.message.indexOf('You cannot withdraw more than you have staked.') > -1, true)
+            }
+
+            try {
+                await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
+                await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+                // attempt multiple withdrawals
+                await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+                await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            } catch(e) {
+                assert.equal(e.message.indexOf('You cannot withdraw more than you have staked.') > -1, true)
+            }
+
+        })
+
+        it('investor can withdraw', async() => {
+
+            await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            const investorBalance = await tokenFarm.stakingBalance(investor)
+            assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))
+        })
+
+        it('investor is no longer a staker after full withdrawal', async() => {
+
+            await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            const investorBalance = await tokenFarm.stakingBalance(investor)
+            assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))
+
+            const isStaker = await tokenFarm.hasStaked(investor)
+
+            assert.equal(isStaker, false)
+
+        })
+
+    })
+
     describe('tokenFarm.issueTokens', () => {
         it('can only be called by the contract owner', async() => {
 
             try {
                 await tokenFarm.issueTokens({from: investor})
-            } catch (e) {
+            } catch(e) {
                 assert.equal(e.message.indexOf('Only the contract owner') > -1, true)
             }
 

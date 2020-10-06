@@ -12,6 +12,7 @@ contract('TokenFarm', accounts => {
     let daiToken, dappToken, tokenFarm
     const owner = accounts[0]
     const investor = accounts[1]
+    const investor2 = accounts[2]
 
     beforeEach(async() => {
         daiToken = await DaiToken.new()
@@ -29,6 +30,7 @@ contract('TokenFarm', accounts => {
           }
          */
         await daiToken.transfer(investor, web3.utils.toWei('100', 'ether'), {from: owner})
+        await daiToken.transfer(investor2, web3.utils.toWei('100', 'ether'), {from: owner})
     })
 
     describe('Mock Dai Deployment', async() => {
@@ -64,6 +66,67 @@ contract('TokenFarm', accounts => {
             const balance = await dappToken.balanceOf(tokenFarm.address)
             assert.equal(balance.toString(), web3.utils.toWei('1000000', 'ether'))
         })
+    })
+
+
+    describe('Token Farm Staking', async() => {
+        it('investors can stake dai tokens', async() => {
+            const daiBalance_before = await daiToken.balanceOf(investor)
+            assert.equal(daiBalance_before, web3.utils.toWei('100', 'ether'), 'Investor has 100 ether BEFORE xfer')
+
+            await daiToken.approve(tokenFarm.address, web3.utils.toWei('1', 'ether'), {from: investor})
+            await tokenFarm.stakeTokens(web3.utils.toWei('1', 'ether'), {from: investor})
+
+            const daiBalance_after = await daiToken.balanceOf(investor)
+            assert.equal(daiBalance_after, web3.utils.toWei('99', 'ether'), 'Investor has 99 ether AFTER xfer')
+
+            const hasStaked = await tokenFarm.hasStaked(investor)
+            const isStaking = await tokenFarm.isStaking(investor)
+            const stakingBalance = await tokenFarm.stakingBalance(investor)
+
+            assert.equal(hasStaked, true, 'Investor hasStaked')
+            assert.equal(isStaking, true, 'Investor isStaking')
+            assert.equal(stakingBalance, web3.utils.toWei('1', 'ether'), 'Investor staking balance is 1')
+        })
+
+    })
+
+    describe('tokenFarm.issueTokens', () => {
+        it('can only be called by the contract owner', async() => {
+
+            try {
+                await tokenFarm.issueTokens({from: investor})
+            } catch (e) {
+                assert.equal(e.message.indexOf('Only the contract owner') > -1, true)
+            }
+
+        })
+
+
+        it('does NOT issue tokens to non-stakers', async() => {
+            await tokenFarm.issueTokens({from: owner})
+
+            const investorBalance = await dappToken.balanceOf(investor)
+            assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))
+        })
+
+        it('issues tokens to all stakers', async() => {
+
+            await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            await daiToken.approve(tokenFarm.address, web3.utils.toWei('20', 'ether'), {from: investor2})
+            await tokenFarm.stakeTokens(web3.utils.toWei('20', 'ether'), {from: investor2})
+
+            await tokenFarm.issueTokens({from: owner})
+
+            const investor1Balance = await dappToken.balanceOf(investor)
+            const investor2Balance = await dappToken.balanceOf(investor2)
+
+            assert.equal(investor1Balance.toString(), web3.utils.toWei('10', 'ether'), 'Investor 1 has 10 ether')
+            assert.equal(investor2Balance.toString(), web3.utils.toWei('20', 'ether'), 'Investor 2 has 20 ether')
+        })
+
     })
 
 })

@@ -13,7 +13,7 @@ contract('TokenFarm', accounts => {
     const owner = accounts[0]
     const investor = accounts[1]
 
-    before(async() => {
+    beforeEach(async() => {
         daiToken = await DaiToken.new()
         dappToken = await DappToken.new()
         tokenFarm = await TokenFarm.new(dappToken.address, daiToken.address)

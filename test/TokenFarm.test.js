@@ -24,8 +24,8 @@ contract('TokenFarm', accounts => {
     const investor2 = accounts[2]
 
     beforeEach(async() => {
-        daiToken = await DaiToken.new()
-        dappToken = await DappToken.new()
+        daiToken = await DaiToken.new(web3.utils.toWei('1000000', 'ether'))
+        dappToken = await DappToken.new(web3.utils.toWei('1000000', 'ether'))
         tokenFarm = await TokenFarm.new(dappToken.address, daiToken.address)
 
         // transfer all Dapp Tokens to the farm (1 million)

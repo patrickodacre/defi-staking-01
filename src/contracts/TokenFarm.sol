@@ -57,6 +57,13 @@ contract TokenFarm {
 
         for (uint i = 0; i < stakers.length; i++) {
             address recipient = stakers[i];
+
+            // just skip this investor if they
+            // are no longer staked
+            if (!hasStaked[recipient]) {
+                continue;
+            }
+
             uint balance = stakingBalance[recipient];
             // 1:1 exchange
             dappToken.transfer(recipient, balance);

@@ -22,6 +22,7 @@ class Navbar extends Component {
             window.web3 = new Web3(Web3.currentProvider)
         } else {
             window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
+            throw new Error('Non-Ethereum browser detected.')
         }
     }
 
@@ -38,8 +39,12 @@ class Navbar extends Component {
     }
 
     async loadEth() {
-        await this.loadWeb3()
-        await this.loadData()
+        try {
+            await this.loadWeb3()
+            await this.loadData()
+        } catch (e) {
+            alert('Failed to connect to the network.')
+        }
     }
 
   render() {

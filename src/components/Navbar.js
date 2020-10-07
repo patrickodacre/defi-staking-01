@@ -7,16 +7,12 @@ class Navbar extends Component {
     constructor(props) {
         super(props)
 
-        this.loadWeb3 = this.loadWeb3.bind(this)
-        this.loadData = this.loadData.bind(this)
-        this.loadEth = this.loadEth.bind(this)
-
         this.state = {
             account: null,
         }
     }
 
-    async loadEth() {
+    loadEth = async () => {
         try {
             await this.loadWeb3()
             await this.loadData()
@@ -25,13 +21,13 @@ class Navbar extends Component {
         }
     }
 
-    async loadData() {
+    loadData = async () => {
         const [account] = await window.web3.eth.getAccounts()
 
         this.setState({account})
     }
 
-    async loadWeb3() {
+    loadWeb3 = async () => {
         // ethereum object is set by
         // https://eips.ethereum.org/EIPS/eip-1193
         // compliant providers like MetaMask
@@ -56,7 +52,7 @@ class Navbar extends Component {
               <small id="account">{this.state.account}</small>
               </small>
       } else {
-          accountButton = <button class="btn btn-primary" onClick={this.loadEth}>Enable Ethereum</button>
+          accountButton = <button className="btn btn-primary" onClick={this.loadEth}>Enable Ethereum</button>
       }
 
     return (

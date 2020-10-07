@@ -4,13 +4,13 @@ const TokenFarm = artifacts.require("TokenFarm");
 
 module.exports = async function(deployer, network, accounts) {
     // put all tokens on the blockchain
-    const _daiToken = new DaiToken(web3.utils.toWei('1000000', 'ether'))
-    await deployer.deploy(_daiToken)
-    const daiToken = await _daiToken.deployed()
+    const initialSupply = web3.utils.toWei('1000000', 'ether')
 
-    const _dappToken = new DappToken(web3.utils.toWei('1000000', 'ether'))
-    await deployer.deploy(_dappToken)
-    const dappToken = await _dappToken.deployed()
+    await deployer.deploy(DaiToken, initialSupply)
+    const daiToken = await DaiToken.deployed()
+
+    await deployer.deploy(DappToken, initialSupply)
+    const dappToken = await DappToken.deployed()
 
     await deployer.deploy(TokenFarm, dappToken.address, daiToken.address)
     const tokenFarm = await TokenFarm.deployed()

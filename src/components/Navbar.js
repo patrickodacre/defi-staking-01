@@ -4,6 +4,27 @@ import Web3 from 'web3'
 
 class Navbar extends Component {
 
+    constructor(props) {
+        super(props)
+
+        this.loadWeb3 = this.loadWeb3.bind(this)
+        this.loadData = this.loadData.bind(this)
+        this.loadEth = this.loadEth.bind(this)
+
+        this.state = {
+            account: null,
+        }
+    }
+
+    async loadEth() {
+        try {
+            await this.loadWeb3()
+            await this.loadData()
+        } catch (e) {
+            alert('Failed to connect to the network.')
+        }
+    }
+
     async loadData() {
         const [account] = await window.web3.eth.getAccounts()
 
@@ -23,27 +44,6 @@ class Navbar extends Component {
         } else {
             window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
             throw new Error('Non-Ethereum browser detected.')
-        }
-    }
-
-    constructor(props) {
-        super(props)
-
-        this.loadWeb3 = this.loadWeb3.bind(this)
-        this.loadData = this.loadData.bind(this)
-        this.loadEth = this.loadEth.bind(this)
-
-        this.state = {
-            account: null,
-        }
-    }
-
-    async loadEth() {
-        try {
-            await this.loadWeb3()
-            await this.loadData()
-        } catch (e) {
-            alert('Failed to connect to the network.')
         }
     }
 

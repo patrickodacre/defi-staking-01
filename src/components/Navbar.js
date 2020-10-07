@@ -58,7 +58,7 @@ class Navbar extends Component {
       <nav className="navbar navbar-dark bg-dark flex-md-nowrap mb-4 shadow">
         <a
           className="navbar-brand col-sm-3 col-md-2 mr-0"
-          href="http://www.dappuniversity.com/bootcamp"
+          href="/"
           target="_blank"
           rel="noopener noreferrer"
         >

@@ -17,6 +17,9 @@ contract TokenFarm {
     mapping(address => bool) public isStaking;
     mapping(address => bool) public hasStaked;
 
+    // events
+    event TokensStaked(address indexed investor, uint amountStaked, uint newDaiBalance, uint newDappBalance);
+
     constructor(DappToken _dappToken, DaiToken _daiToken) public {
         dappToken = _dappToken;
         daiToken = _daiToken;
@@ -37,6 +40,10 @@ contract TokenFarm {
         }
 
         isStaking[msg.sender] = true;
+
+        uint remainingDai = daiToken.balanceOf(msg.sender);
+
+        emit TokensStaked(msg.sender, _amount, remainingDai, stakingBalance[msg.sender]);
     }
 
     function withdrawTokens(uint _amount) public {

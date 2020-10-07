@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Navbar from './Navbar'
 import './App.css'
+import Main from './Main'
 import Web3 from 'web3'
 import DaiToken from '../abis/DaiToken.json'
 import DappToken from '../abis/DappToken.json'
@@ -28,6 +29,7 @@ class App extends Component {
             this.setState({loading: true})
             await this.loadWeb3()
             await this.loadData()
+            await this.registerContractEventListeners()
             this.setState({loading: false})
         } catch (e) {
             this.setState({loading: false})
@@ -105,7 +107,64 @@ class App extends Component {
         }
     }
 
+    stakeTokens = async amount => {
+        this.setState({ loading: true })
+
+        this.state.daiToken.methods
+            .approve(this.state.tokenFarm._address, amount)
+            .send({ from: this.state.account })
+            .on('transactionHash', (hash) => {
+                this.state.tokenFarm.methods.stakeTokens(amount)
+                    .send({ from: this.state.account })
+                    .on('receipt', r => {
+                        console.log('Staked tokens receipt: ', r)
+                        this.setState({ loading: false })
+                    })
+                    .on('error', err => {
+                        alert(err.message)
+                        console.err(err)
+                        this.setState({ loading: false })
+                    })
+            })
+    }
+
+    withdrawTokens = async amount => {
+        this.setState({ loading: true })
+
+        this.state.tokenFarm.methods
+            .withdrawTokens(amount)
+            .send({ from: this.state.account })
+            .on('transactionHash', hash => {
+                console.log('done withdrawing tokens. Transaction hash: ', hash)
+                this.setState({ loading: false })
+            })
+    }
+
+    registerContractEventListeners = async () => {
+        this.state.tokenFarm.events.TokensStaked({filter: {address: this.state.account}})
+            .on('data', evt => {
+                const {returnValues} = evt
+
+                this.setState({daiTokenBalance: returnValues.newDaiBalance.toString()})
+            })
+            .on('error', err => {
+                console.error(err)
+                alert(err.message)
+            })
+    }
+
   render() {
+
+      const content = this.state.loading
+            ? "loading..."
+            : <Main
+                    daiTokenBalance={this.state.daiTokenBalance}
+                    dappTokenBalance={this.state.dappTokenBalance}
+                    stakingBalance={this.state.stakingBalance}
+                    stakeTokens={this.stakeTokens}
+                    unstakeTokens={this.unstakeTokens}
+            />
+
     return (
       <div>
         <Navbar onLoadEth={this.loadEth} account={this.state.account}/>
@@ -113,7 +172,7 @@ class App extends Component {
           <div className="row">
             <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '600px' }}>
               <div className="content mr-auto ml-auto">
-                <h1>Hello, World!</h1>
+                {content}
               </div>
             </main>
           </div>

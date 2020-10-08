@@ -12,3 +12,15 @@ You can learn a lot by just combing through a codebase to see examples of how a 
 
 - token contracts created with OpenZeppelin's ERC20 proxy contract
 - full suite of JavaScript tests to test our contract APIs
+
+## Run the Project Locally
+
+- clone the repo
+- `npm install` in the root directory
+- start local blockchain - eg: Ganache
+- terminal 1: `truffle migrate`
+- terminal 2: `npm start`
+
+
+## Run Tests
+- `npx buidler test`

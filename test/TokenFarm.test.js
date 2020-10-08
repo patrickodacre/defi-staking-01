@@ -90,11 +90,9 @@ contract('TokenFarm', accounts => {
             assert.equal(daiBalance_after, web3.utils.toWei('99', 'ether'), 'Investor has 99 ether AFTER xfer')
 
             const hasStaked = await tokenFarm.hasStaked(investor)
-            const isStaking = await tokenFarm.isStaking(investor)
             const stakingBalance = await tokenFarm.stakingBalance(investor)
 
             assert.equal(hasStaked, true, 'Investor hasStaked')
-            assert.equal(isStaking, true, 'Investor isStaking')
             assert.equal(stakingBalance, web3.utils.toWei('1', 'ether'), 'Investor staking balance is 1')
         })
 

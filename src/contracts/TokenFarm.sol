@@ -14,7 +14,6 @@ contract TokenFarm {
     // MAPS
     address[] public stakers;
     mapping(address => uint) public stakingBalance;
-    mapping(address => bool) public isStaking;
     mapping(address => bool) public hasStaked;
 
     // events
@@ -39,8 +38,6 @@ contract TokenFarm {
             hasStaked[msg.sender] = true;
         }
 
-        isStaking[msg.sender] = true;
-
         uint remainingDai = daiToken.balanceOf(msg.sender);
 
         emit TokensStaked(msg.sender, _amount, remainingDai, stakingBalance[msg.sender]);
@@ -55,7 +52,6 @@ contract TokenFarm {
 
         if (stakingBalance[msg.sender] == uint(0)) {
             hasStaked[msg.sender] = false;
-            isStaking[msg.sender] = false;
         }
     }
 

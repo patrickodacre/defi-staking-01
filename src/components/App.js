@@ -49,7 +49,6 @@ class App extends Component {
         // DAI Token
         {
             const tokenData  = DaiToken.networks[networkID]
-            const check = DaiToken
             if (tokenData && tokenData.address) {
                 const daiToken = await new web3.eth.Contract(DaiToken.abi, tokenData.address)
                 this.setState({daiToken})

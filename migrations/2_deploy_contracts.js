@@ -22,5 +22,6 @@ module.exports = async function(deployer, network, accounts) {
     // transfer 100 mock dai tokens to an investor
     // in ganache we have a list of accounts
     // the first account is the deployer, so [1] is an investor
-    await daiToken.transfer(accounts[1], "1000000000000000000000000")
+    await daiToken.transfer(accounts[1], "500000000000000000000000")
+    await daiToken.transfer(accounts[0], "500000000000000000000000")
 };

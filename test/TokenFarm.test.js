@@ -161,6 +161,24 @@ contract('TokenFarm', accounts => {
 
         })
 
+        it('does NOT issue tokens to investors that are NO LONGER stakers because they have withdrawn all funds', async() => {
+            await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+
+            const investorBalance = await tokenFarm.stakingBalance(investor)
+            assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))
+
+            const isStaker = await tokenFarm.hasStaked(investor)
+
+            assert.equal(isStaker, false)
+
+            await tokenFarm.issueTokens({from: owner})
+
+            const investorBalance2 = await dappToken.balanceOf(investor)
+            assert.equal(investorBalance2.toString(), web3.utils.toWei('0', 'ether'))
+        })
 
         it('does NOT issue tokens to non-stakers', async() => {
             await tokenFarm.issueTokens({from: owner})

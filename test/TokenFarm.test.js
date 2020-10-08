@@ -98,46 +98,46 @@ contract('TokenFarm', accounts => {
 
     })
 
-    describe('tokenFarm.withdrawTokens', () => {
-        it('investor cannot withdraw more than they have staked', async() => {
+    describe('tokenFarm.unstakeTokens', () => {
+        it('investor cannot unstake more than they have staked', async() => {
 
             try {
-                await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+                await tokenFarm.unstakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
             } catch(e) {
-                assert.equal(e.message.indexOf('You cannot withdraw more than you have staked.') > -1, true)
+                assert.equal(e.message.indexOf('You cannot unstake more than you have staked.') > -1, true)
             }
 
             try {
                 await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
                 await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
-                // attempt multiple withdrawals
-                await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
-                await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+                // attempt multiple unstakeTokens()
+                await tokenFarm.unstakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+                await tokenFarm.unstakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
             } catch(e) {
-                assert.equal(e.message.indexOf('You cannot withdraw more than you have staked.') > -1, true)
+                assert.equal(e.message.indexOf('You cannot unstake more than you have staked.') > -1, true)
             }
 
         })
 
-        it('investor can withdraw', async() => {
+        it('investor can unstake', async() => {
 
             await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
             await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
-            await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.unstakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
             const investorBalance = await tokenFarm.stakingBalance(investor)
             assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))
         })
 
-        it('investor is no longer a staker after full withdrawal', async() => {
+        it('investor is no longer a staker after full unstaking', async() => {
 
             await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
             await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
-            await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.unstakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
             const investorBalance = await tokenFarm.stakingBalance(investor)
             assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))
@@ -161,11 +161,11 @@ contract('TokenFarm', accounts => {
 
         })
 
-        it('does NOT issue tokens to investors that are NO LONGER stakers because they have withdrawn all funds', async() => {
+        it('does NOT issue tokens to investors that are NO LONGER stakers because they have unstaking all funds', async() => {
             await daiToken.approve(tokenFarm.address, web3.utils.toWei('10', 'ether'), {from: investor})
             await tokenFarm.stakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
-            await tokenFarm.withdrawTokens(web3.utils.toWei('10', 'ether'), {from: investor})
+            await tokenFarm.unstakeTokens(web3.utils.toWei('10', 'ether'), {from: investor})
 
             const investorBalance = await tokenFarm.stakingBalance(investor)
             assert.equal(investorBalance.toString(), web3.utils.toWei('0', 'ether'))

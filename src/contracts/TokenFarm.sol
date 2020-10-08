@@ -17,7 +17,10 @@ contract TokenFarm {
     mapping(address => bool) public hasStaked;
 
     // events
-    event TokensStaked(address indexed investor, uint amountStaked, uint newDaiBalance, uint newDappBalance);
+    event TokensStaked(address indexed investor, uint amountStaked, uint newDaiBalance, uint newStakingBalance);
+    event TokensUnstaked(address indexed investor, uint amountUnstaked, uint newDaiBalance, uint newStakingBalance);
+    event TokensIssued(address indexed investor, uint amountIssued, uint newDappBalance);
+
 
     constructor(DappToken _dappToken, DaiToken _daiToken) public {
         dappToken = _dappToken;
@@ -43,16 +46,25 @@ contract TokenFarm {
         emit TokensStaked(msg.sender, _amount, remainingDai, stakingBalance[msg.sender]);
     }
 
-    function withdrawTokens(uint _amount) public {
+    // unstakeTokens reimburses the entire staking balance to the user.
+    // We updated the hasStaked status, but we don't recreate the stakers array
+    // as it is likely too costly to recreate the array.
+    function unstakeTokens(uint _amount) public {
         uint currentBalance = stakingBalance[msg.sender];
 
-        require(_amount <= currentBalance, "You cannot withdraw more than you have staked.");
+        require(_amount <= currentBalance, "You cannot unstake more than you have staked.");
 
         stakingBalance[msg.sender] = stakingBalance[msg.sender] - _amount;
 
         if (stakingBalance[msg.sender] == uint(0)) {
             hasStaked[msg.sender] = false;
         }
+
+        daiToken.transfer(msg.sender, _amount);
+
+        uint newDaiBalance = daiToken.balanceOf(msg.sender);
+
+        emit TokensUnstaked(msg.sender, _amount, newDaiBalance, stakingBalance[msg.sender]);
     }
 
     function issueTokens() public {
@@ -67,9 +79,13 @@ contract TokenFarm {
                 continue;
             }
 
-            uint balance = stakingBalance[recipient];
+            uint amountIssued = stakingBalance[recipient];
             // 1:1 exchange
-            dappToken.transfer(recipient, balance);
+            dappToken.transfer(recipient, amountIssued);
+
+            uint dappBalance = dappToken.balanceOf(recipient);
+
+            emit TokensIssued(recipient, amountIssued, dappBalance);
         }
     }
 }

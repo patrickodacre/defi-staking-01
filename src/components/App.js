@@ -121,30 +121,67 @@ class App extends Component {
                     })
                     .on('error', err => {
                         alert(err.message)
-                        console.err(err)
+                        console.error(err)
                         this.setState({ loading: false })
                     })
             })
+            .on('error', err => {
+                console.error(err)
+                this.setState({loading: false})
+            })
     }
 
-    withdrawTokens = async amount => {
-        this.setState({ loading: true })
+    unstakeTokens = async amount => {
+        this.setState({loading: true})
 
         this.state.tokenFarm.methods
-            .withdrawTokens(amount)
-            .send({ from: this.state.account })
-            .on('transactionHash', hash => {
-                console.log('done withdrawing tokens. Transaction hash: ', hash)
-                this.setState({ loading: false })
+            .unstakeTokens(amount)
+            .send({from: this.state.account})
+            .on('receipt', r => {
+                console.log('done unstaking tokens.')
+                this.setState({loading: false})
+            })
+            .on('error', err => {
+                console.error(err)
+                this.setState({loading: false})
             })
     }
 
     registerContractEventListeners = async () => {
         this.state.tokenFarm.events.TokensStaked({filter: {address: this.state.account}})
-            .on('data', evt => {
-                const {returnValues} = evt
+            .on('data', ({returnValues}) => {
 
-                this.setState({daiTokenBalance: returnValues.newDaiBalance.toString()})
+                this.setState({
+                    stakingBalance: returnValues.newStakingBalance.toString(),
+                    daiTokenBalance: returnValues.newDaiBalance.toString(),
+                })
+            })
+            .on('error', err => {
+                console.error(err)
+                alert(err.message)
+            })
+
+        this.state.tokenFarm.events.TokensUnstaked({filter: {address: this.state.account}})
+            .on('data', ({returnValues}) => {
+
+                this.setState({
+                    stakingBalance: returnValues.newStakingBalance.toString(),
+                    daiTokenBalance: returnValues.newDaiBalance.toString(),
+                })
+            })
+            .on('error', err => {
+                console.error(err)
+                alert(err.message)
+            })
+
+        this.state.tokenFarm.events.TokensIssued({filter: {address: this.state.account}})
+            .on('data', ({returnValues}) => {
+
+                console.log(`Issued ${returnValues.amountIssued} Dapp Tokens`)
+
+                this.setState({
+                    dappTokenBalance: returnValues.newDappBalance,
+                })
             })
             .on('error', err => {
                 console.error(err)
@@ -169,7 +206,7 @@ class App extends Component {
         <Navbar onLoadEth={this.loadEth} account={this.state.account}/>
         <div className="container-fluid">
           <div className="row">
-            <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '600px' }}>
+            <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '1000px' }}>
               <div className="content mr-auto ml-auto">
                 {content}
               </div>

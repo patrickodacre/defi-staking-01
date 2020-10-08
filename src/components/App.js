@@ -155,7 +155,7 @@ class App extends Component {
   render() {
 
       const content = this.state.loading
-            ? "loading..."
+            ? <div>You must connect with a wallet like MetaMask to use this site.</div>
             : <Main
                     daiTokenBalance={this.state.daiTokenBalance}
                     dappTokenBalance={this.state.dappTokenBalance}
